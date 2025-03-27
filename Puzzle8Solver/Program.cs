@@ -1,3 +1,3 @@
 ﻿
-using var game = new Puzzle8Solver.Game1();
+using var game = new Puzzle8Solver.Game();
 game.Run();
