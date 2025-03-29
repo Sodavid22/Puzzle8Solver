@@ -5,9 +5,9 @@ namespace Puzzle8Solver
 {
     public class Button
     {
-        protected Rectangle Rectangle;
-        protected Color Color;
-        protected int Border;
+        public Rectangle Rectangle;
+        public Color Color;
+        public int Border;
         Vector2 TextSize;
         public string Text;
         public bool Hovered;
@@ -66,6 +66,22 @@ namespace Puzzle8Solver
             {
                 Game.SpriteBatch.Draw(Textures.EmptyTexture, Rectangle, Color.FromNonPremultiplied(new Vector4(0, 0, 0, 0.2f)));
             }
+        }
+
+
+        public bool IsPressed(MouseKey mouseKey)
+        {
+            if (MyKeyboard.IsPressed(mouseKey))
+            {
+                if (Hovered)
+                {
+                    if (Active)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
     }
 }

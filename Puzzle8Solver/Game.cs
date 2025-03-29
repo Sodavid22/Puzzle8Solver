@@ -14,9 +14,9 @@ public class Game : Microsoft.Xna.Framework.Game
     public static SpriteFont Font;
     public static Button[] Buttons;
 
-    private const int ButtonWidth = 240;
-    private const int ButtonHeight = 60;
-    private const int ButtonSpacing = 20;
+    public const int ButtonWidth = 240;
+    public const int ButtonHeight = 60;
+    public const int ButtonSpacing = 20;
 
     public Game()
     {
@@ -42,8 +42,13 @@ public class Game : Microsoft.Xna.Framework.Game
 
         Font = Content.Load<SpriteFont>("DefaultFont");
 
-        Buttons = new Button[3] { new Button(new Rectangle(ButtonSpacing, ButtonSpacing, ButtonWidth, ButtonHeight), new Vector4(0, 1, 0, 1), 2, "Solve"), new Button(new Rectangle(ButtonSpacing, ButtonSpacing * 2 + ButtonHeight, ButtonWidth, ButtonHeight), new Vector4(0, 1, 0, 1), 2, "Generate"), new Button(new Rectangle(ButtonSpacing, ButtonSpacing * 3 + ButtonHeight * 2, ButtonWidth, ButtonHeight), new Vector4(0, 1, 0, 1), 2, "") };
-        Buttons[2].Active = false;
+        Buttons = new Button[5] { new Button(new Rectangle(ButtonSpacing, ButtonSpacing, ButtonWidth, ButtonHeight), new Vector4(0, 1, 0, 1), 2, "Solve")
+            , new Button(new Rectangle(ButtonSpacing, ButtonSpacing * 2 + ButtonHeight, ButtonWidth, ButtonHeight), new Vector4(0, 1, 0, 1), 2, "Generate")
+            , new Button(new Rectangle(ButtonSpacing, ButtonSpacing * 3 + ButtonHeight * 2, ButtonWidth, ButtonHeight), new Vector4(0, 1, 0, 1), 2, "Clear")
+            , new Button(new Rectangle(ButtonSpacing, ButtonSpacing * 4 + ButtonHeight * 3, ButtonWidth/2, ButtonHeight), new Vector4(0, 1, 0, 1), 2, "Previous")
+            , new Button(new Rectangle(ButtonSpacing + ButtonWidth/2, ButtonSpacing * 4 + ButtonHeight * 3, ButtonWidth/2, ButtonHeight), new Vector4(0, 1, 0, 1), 2, "Next") };
+
+        PuzzleManager.Load();
     }
 
     protected override void Update(GameTime gameTime)
@@ -62,6 +67,31 @@ public class Game : Microsoft.Xna.Framework.Game
             button.Update(elapsedTime);
         }
 
+        if (Buttons[0].IsPressed(MouseKey.Left) && PuzzleManager.RemainingNumbers.Count == 0) // solve
+        {
+            PuzzleManager.Solve();
+        }
+
+        if (Buttons[1].IsPressed(MouseKey.Left)) // generate
+        {
+            PuzzleManager.GenerateMatrix();
+        }
+
+        if (Buttons[2].IsPressed(MouseKey.Left)) // clear
+        {
+            PuzzleManager.ClearInput();
+        }
+
+        if (Buttons[3].IsPressed(MouseKey.Left) && PuzzleManager.CurrentStep < PuzzleManager.FinalSteps.Count - 1) // previous
+        {
+            PuzzleManager.CurrentStep++;
+        }
+
+        if (Buttons[4].IsPressed(MouseKey.Left) && PuzzleManager.CurrentStep > 0) // next
+        {
+            PuzzleManager.CurrentStep--;
+        }
+
         PuzzleManager.Update(elapsedTime);
 
         base.Update(gameTime);
@@ -76,6 +106,8 @@ public class Game : Microsoft.Xna.Framework.Game
         {
             button.Draw();
         }
+
+        PuzzleManager.Draw();
 
         SpriteBatch.End();
         base.Draw(gameTime);
