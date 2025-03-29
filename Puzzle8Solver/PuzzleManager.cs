@@ -123,7 +123,7 @@ namespace Puzzle8Solver
             int generations = 0;
             Stopwatch sw = Stopwatch.StartNew();
 
-            while (!Solved && generations < 20)
+            while (!Solved && generations < 32)
             {
                 foreach (PuzzleStep step in LastSteps)
                 {
