@@ -17,17 +17,17 @@ namespace Puzzle8Solver
         public static List<int> RemainingNumbers = new List<int>() {1, 2, 3, 4, 5, 6, 7, 8 };
         public static int CurrentStep = 0;
         static int[] Input = new int[9];
-        static int[] CurrentMatrix = new int[9];
+        static int[] DisplayedMatrix = new int[9];
         public static bool Solved = false;
 
 
         public static void Load()
         {
-            for (int x = 0; x < 3; x++)
+            for (int y = 0; y < 3; y++)
             {
-                for (int y = 0; y < 3; y++)
+                for (int x = 0; x < 3; x++)
                 {
-                    Buttons[x*3+y] = new Button(new Rectangle(x * ButtonSize + Game.ButtonWidth + Game.ButtonSpacing*2, y * ButtonSize + Game.ButtonSpacing, ButtonSize, ButtonSize), Game.Self.buttoncolor, 1, "0");
+                    Buttons[y*3+x] = new Button(new Rectangle(x * ButtonSize + Game.ButtonWidth + Game.ButtonSpacing*2, y * ButtonSize + Game.ButtonSpacing, ButtonSize, ButtonSize), Game.Self.buttoncolor, 1, "0");
                 }
             }
         }
@@ -37,7 +37,7 @@ namespace Puzzle8Solver
         {
             for (int i = 0; i < 9; i++)
             {
-                Buttons[i].Text = CurrentMatrix[i].ToString();
+                Buttons[i].Text = DisplayedMatrix[i].ToString();
                 Buttons[i].Update(elapsedTime);
 
                 if (Buttons[i].IsPressed(MouseKey.Left) && RemainingNumbers.Count > 0 && Input[i] == 0)
@@ -49,17 +49,11 @@ namespace Puzzle8Solver
 
             if (Solved)
             {
-                for (int x = 0; x < 3; x++)
-                {
-                    for (int y = 0; y < 3; y++)
-                    {
-                        CurrentMatrix[x * 3 + y] = FinalSteps[CurrentStep].Matrix[y, x];
-                    }
-                }
+                DisplayedMatrix = (int[])FinalSteps[CurrentStep].Matrix.Clone();
             }
             else
             {
-                CurrentMatrix = (int[])Input.Clone();
+                DisplayedMatrix = (int[])Input.Clone();
             }
         }
 
@@ -106,22 +100,20 @@ namespace Puzzle8Solver
             PuzzleStep finalStep = null;
             Solved = false;
 
-            int[,] solution = new int[3, 3] { { 0, 1, 2 }, { 3, 4, 5 }, { 6, 7, 8 } };
+            int[] solution = new int[9] { 0,1,2,3,4,5,6,7,8 };
 
-            int[,] firstMatrix = new int[3, 3];
-            for (int x = 0; x < 3; x++)
-            {
-                for (int y = 0; y < 3; y++)
-                {
-                    firstMatrix[y, x] = Input[x * 3 + y];
-                }
-            }
-
-            AllSteps.Add(new PuzzleStep(null, firstMatrix));
-            LastSteps.Add(AllSteps[0]);
+            PuzzleStep firstStep = new PuzzleStep(null, Input);
+            AllSteps.Add(firstStep);
+            LastSteps.Add(firstStep);
 
             int generations = 0;
             Stopwatch sw = Stopwatch.StartNew();
+
+            if (firstStep.IsEqual(solution))
+            {
+                Solved = true;
+                finalStep = firstStep;
+            }
 
             while (!Solved && generations < 32)
             {
@@ -143,6 +135,9 @@ namespace Puzzle8Solver
                 NewSteps = new List<PuzzleStep>();
                 generations++;
                 Debug.WriteLine("generation: " + generations);
+                Debug.WriteLine("childeren: " + LastSteps.Count);
+                Debug.WriteLine("total: " + AllSteps.Count);
+                Debug.WriteLine("---------------");
             }
 
             sw.Stop();
@@ -174,78 +169,75 @@ namespace Puzzle8Solver
 
         public static void CreateChilderen(PuzzleStep step)
         {
-            int[,] newMatrix;
+            int[] newMatrix;
             PuzzleStep newStep;
 
-            for (int x = 0; x < 3; x++)
+            for (int i = 0; i < 9; i++)
             {
-                for (int y = 0; y < 3; y++)
+                if (step.Matrix[i] == 0)
                 {
-                    if (step.Matrix[x, y] == 0)
+                    if (i!= 2 && i!= 5 && i!= 8) // move zero right
                     {
-                        if (x < 2) // move zero right
+                        newMatrix = (int[])step.Matrix.Clone();
+
+                        newMatrix[i] = newMatrix[i+1];
+                        newMatrix[i+1] = 0;
+
+                        if (!IsDuplicate(newMatrix)) 
                         {
-                            newMatrix = (int[,])step.Matrix.Clone();
-
-                            newMatrix[x, y] = newMatrix[x + 1, y];
-                            newMatrix[x + 1, y] = 0;
-
-                            if (!IsDuplicate(newMatrix)) 
-                            {
-                                newStep = new PuzzleStep(step, newMatrix);
-                                AllSteps.Add(newStep);
-                                NewSteps.Add(newStep);
-                            }
+                            newStep = new PuzzleStep(step, newMatrix);
+                            AllSteps.Add(newStep);
+                            NewSteps.Add(newStep);
                         }
-                        if (x > 0) // move zero left
-                        {
-                            newMatrix = (int[,])step.Matrix.Clone();
-
-                            newMatrix[x, y] = newMatrix[x - 1, y];
-                            newMatrix[x - 1, y] = 0;
-
-                            if (!IsDuplicate(newMatrix))
-                            {
-                                newStep = new PuzzleStep(step, newMatrix);
-                                AllSteps.Add(newStep);
-                                NewSteps.Add(newStep);
-                            }
-                        }
-                        if (y > 0) // move zero up
-                        {
-                            newMatrix = (int[,])step.Matrix.Clone();
-
-                            newMatrix[x, y] = newMatrix[x, y - 1];
-                            newMatrix[x, y - 1] = 0;
-
-                            if (!IsDuplicate(newMatrix))
-                            {
-                                newStep = new PuzzleStep(step, newMatrix);
-                                AllSteps.Add(newStep);
-                                NewSteps.Add(newStep);
-                            }
-                        }
-                        if (y < 2) // move zero down
-                        {
-                            newMatrix = (int[,])step.Matrix.Clone();
-
-                            newMatrix[x, y] = newMatrix[x, y + 1];
-                            newMatrix[x, y + 1] = 0;
-
-                            if (!IsDuplicate(newMatrix))
-                            {
-                                newStep = new PuzzleStep(step, newMatrix);
-                                AllSteps.Add(newStep);
-                                NewSteps.Add(newStep);
-                            }
-                        }
-                        return;
                     }
+                    if (i != 0 && i != 3 && i != 6) // move zero left
+                    {
+                        newMatrix = (int[])step.Matrix.Clone();
+
+                        newMatrix[i] = newMatrix[i-1];
+                        newMatrix[i-1] = 0;
+
+                        if (!IsDuplicate(newMatrix))
+                        {
+                            newStep = new PuzzleStep(step, newMatrix);
+                            AllSteps.Add(newStep);
+                            NewSteps.Add(newStep);
+                        }
+                    }
+                    if (i > 2) // move zero up
+                    {
+                        newMatrix = (int[])step.Matrix.Clone();
+
+                        newMatrix[i] = newMatrix[i-3];
+                        newMatrix[i-3] = 0;
+
+                        if (!IsDuplicate(newMatrix))
+                        {
+                            newStep = new PuzzleStep(step, newMatrix);
+                            AllSteps.Add(newStep);
+                            NewSteps.Add(newStep);
+                        }
+                    }
+                    if (i < 6) // move zero down
+                    {
+                        newMatrix = (int[])step.Matrix.Clone();
+
+                        newMatrix[i] = newMatrix[i+3];
+                        newMatrix[i+3] = 0;
+
+                        if (!IsDuplicate(newMatrix))
+                        {
+                            newStep = new PuzzleStep(step, newMatrix);
+                            AllSteps.Add(newStep);
+                            NewSteps.Add(newStep);
+                        }
+                    }
+                    return;
                 }
             }
         }
 
-        public static bool IsDuplicate(int[,] matrix)
+        public static bool IsDuplicate(int[] matrix)
         {
             foreach (PuzzleStep comparedStep in AllSteps)
             {

@@ -5,9 +5,9 @@ namespace Puzzle8Solver
     internal class PuzzleStep
     {
         public PuzzleStep Previous;
-        public int[,] Matrix;
+        public int[] Matrix;
 
-        public PuzzleStep(PuzzleStep previous, int[,] matrix)
+        public PuzzleStep(PuzzleStep previous, int[] matrix)
         {
             Previous = previous;
             Matrix = matrix;
@@ -16,29 +16,26 @@ namespace Puzzle8Solver
 
         public void Draw()
         {
-            Debug.Write("___");
-            for (int x = 0; x < 3; x++)
+            Debug.WriteLine("___");
+            for (int i = 0; i < 9; i++)
             {
-                Debug.WriteLine("");
-                for (int y = 0; y < 3; y++)
+                if (i == 3 || i == 6)
                 {
-                    Debug.Write(Matrix[x, y]);
+                    Debug.WriteLine("");
                 }
+                Debug.Write(Matrix[i]);
             }
             Debug.WriteLine("");
         }
 
 
-        public bool IsEqual(int[,] matrix)
+        public bool IsEqual(int[] matrix)
         {
-            for (int x = 0; x < 3; x++)
+            for (int i = 0; i < 9; i++)
             {
-                for (int y = 0; y < 3; y++)
+                if (matrix[i] != Matrix[i])
                 {
-                    if (Matrix[x, y] != matrix[x, y])
-                    {
-                        return false;
-                    }
+                    return false;
                 }
             }
             return true;
