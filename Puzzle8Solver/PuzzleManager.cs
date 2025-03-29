@@ -27,7 +27,7 @@ namespace Puzzle8Solver
             {
                 for (int y = 0; y < 3; y++)
                 {
-                    Buttons[x*3+y] = new Button(new Rectangle(x * ButtonSize + Game.ButtonWidth + Game.ButtonSpacing*2, y * ButtonSize + Game.ButtonSpacing, ButtonSize, ButtonSize), new Vector4(0, 1, 0, 1), 1, "0");
+                    Buttons[x*3+y] = new Button(new Rectangle(x * ButtonSize + Game.ButtonWidth + Game.ButtonSpacing*2, y * ButtonSize + Game.ButtonSpacing, ButtonSize, ButtonSize), Game.Self.buttoncolor, 1, "0");
                 }
             }
         }
@@ -84,6 +84,7 @@ namespace Puzzle8Solver
                 RemainingNumbers.Remove(Input[i]);
             }
             Solved = false;
+            Game.Buttons[0].Color = Color.FromNonPremultiplied(Game.Self.buttoncolor);
         }
 
 
@@ -92,6 +93,7 @@ namespace Puzzle8Solver
             Input = new int[9];
             RemainingNumbers = new List<int>() { 1, 2, 3, 4, 5, 6, 7, 8 };
             Solved = false;
+            Game.Buttons[0].Color = Color.FromNonPremultiplied(Game.Self.buttoncolor);
         }
 
 
@@ -121,7 +123,7 @@ namespace Puzzle8Solver
             int generations = 0;
             Stopwatch sw = Stopwatch.StartNew();
 
-            while (!Solved && generations < 30)
+            while (!Solved && generations < 20)
             {
                 foreach (PuzzleStep step in LastSteps)
                 {
@@ -141,7 +143,6 @@ namespace Puzzle8Solver
                 NewSteps = new List<PuzzleStep>();
                 generations++;
                 Debug.WriteLine("generation: " + generations);
-                Debug.WriteLine("objects: " + LastSteps.Count);
             }
 
             sw.Stop();
@@ -157,12 +158,14 @@ namespace Puzzle8Solver
                 FinalSteps.Add(AllSteps[0]);
                 CurrentStep = 0;
 
+                Game.Buttons[0].Color = Color.LawnGreen;
                 Debug.WriteLine("SOLVED");
                 Debug.WriteLine("positions tried: " + AllSteps.Count);
                 Debug.WriteLine("time: " + sw.Elapsed);
             }
             else
             {
+                Game.Buttons[0].Color = Color.Orange;
                 Debug.WriteLine("FAILED");
                 Debug.WriteLine("positions tried: " + AllSteps.Count);
                 Debug.WriteLine("time: " + sw.Elapsed);

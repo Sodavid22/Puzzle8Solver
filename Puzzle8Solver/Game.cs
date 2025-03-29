@@ -17,6 +17,7 @@ public class Game : Microsoft.Xna.Framework.Game
     public const int ButtonWidth = 240;
     public const int ButtonHeight = 60;
     public const int ButtonSpacing = 20;
+    public Vector4 buttoncolor = new Vector4(0.4f, 1, 0.4f, 1);
 
     public Game()
     {
@@ -42,11 +43,11 @@ public class Game : Microsoft.Xna.Framework.Game
 
         Font = Content.Load<SpriteFont>("DefaultFont");
 
-        Buttons = new Button[5] { new Button(new Rectangle(ButtonSpacing, ButtonSpacing, ButtonWidth, ButtonHeight), new Vector4(0, 1, 0, 1), 2, "Solve")
-            , new Button(new Rectangle(ButtonSpacing, ButtonSpacing * 2 + ButtonHeight, ButtonWidth, ButtonHeight), new Vector4(0, 1, 0, 1), 2, "Generate")
-            , new Button(new Rectangle(ButtonSpacing, ButtonSpacing * 3 + ButtonHeight * 2, ButtonWidth, ButtonHeight), new Vector4(0, 1, 0, 1), 2, "Clear")
-            , new Button(new Rectangle(ButtonSpacing, ButtonSpacing * 4 + ButtonHeight * 3, ButtonWidth/2, ButtonHeight), new Vector4(0, 1, 0, 1), 2, "Previous")
-            , new Button(new Rectangle(ButtonSpacing + ButtonWidth/2, ButtonSpacing * 4 + ButtonHeight * 3, ButtonWidth/2, ButtonHeight), new Vector4(0, 1, 0, 1), 2, "Next") };
+        Buttons = new Button[5] { new Button(new Rectangle(ButtonSpacing, ButtonSpacing, ButtonWidth, ButtonHeight), buttoncolor, 2, "Solve")
+            , new Button(new Rectangle(ButtonSpacing, ButtonSpacing * 2 + ButtonHeight, ButtonWidth, ButtonHeight), buttoncolor, 2, "Generate")
+            , new Button(new Rectangle(ButtonSpacing, ButtonSpacing * 3 + ButtonHeight * 2, ButtonWidth, ButtonHeight), buttoncolor, 2, "Clear")
+            , new Button(new Rectangle(ButtonSpacing, ButtonSpacing * 4 + ButtonHeight * 3, ButtonWidth/2, ButtonHeight), buttoncolor, 2, "Previous")
+            , new Button(new Rectangle(ButtonSpacing + ButtonWidth/2, ButtonSpacing * 4 + ButtonHeight * 3, ButtonWidth/2, ButtonHeight), buttoncolor, 2, "Next") };
 
         PuzzleManager.Load();
     }
