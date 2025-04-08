@@ -31,8 +31,10 @@ public class Game : Microsoft.Xna.Framework.Game
     {
         base.Initialize();
 
-        Graphics.PreferredBackBufferWidth = 1280;
-        Graphics.PreferredBackBufferHeight = 720;
+        Graphics.PreferredBackBufferWidth = 600;
+        Graphics.PreferredBackBufferHeight = 340;
+
+        Graphics.ApplyChanges();
     }
 
     protected override void LoadContent()

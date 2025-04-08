@@ -21,6 +21,7 @@ namespace Puzzle8Solver
         static int[] StartingMatrix = new int[9];
         static int[] DisplayedMatrix = new int[9];
         public static bool Solved = false;
+        public static int GeneratedSteps = 0;
 
 
         public static void Load()
@@ -95,6 +96,7 @@ namespace Puzzle8Solver
 
         public static void Solve()
         {
+            GeneratedSteps = 0;
             PreviousGeneration = new List<PuzzleStep>();
             NewGeneration = new List<PuzzleStep>();
             FinalSteps = new List<PuzzleStep>();
@@ -136,9 +138,6 @@ namespace Puzzle8Solver
                 PreviousGeneration = NewGeneration;
                 NewGeneration = new List<PuzzleStep>();
                 generations++;
-                Debug.WriteLine("generation: " + generations);
-                Debug.WriteLine("childeren: " + PreviousGeneration.Count);
-                Debug.WriteLine("---------------");
             }
 
             sw.Stop();
@@ -151,17 +150,22 @@ namespace Puzzle8Solver
                     FinalSteps.Add(currentStep);
                     currentStep = currentStep.Previous;
                 }
+                FinalSteps.Add(firstStep);
                 CurrentStep = 0;
 
                 Game.Buttons[0].Color = Color.LawnGreen;
                 Debug.WriteLine("SOLVED");
                 Debug.WriteLine("time: " + sw.Elapsed);
+                Debug.WriteLine("moves to solve: " + (FinalSteps.Count - 1));
+                Debug.WriteLine("generated positions: " + GeneratedSteps + " (" + (GeneratedSteps / 181440f)*100 + "%)");
             }
             else
             {
                 Game.Buttons[0].Color = Color.Orange;
                 Debug.WriteLine("FAILED");
                 Debug.WriteLine("time: " + sw.Elapsed);
+                Debug.WriteLine("moves to solve: " + (FinalSteps.Count - 1));
+                Debug.WriteLine("generated positions: " + GeneratedSteps + " (" + (GeneratedSteps / 181440f)*100 + "%)");
             }
         }
 

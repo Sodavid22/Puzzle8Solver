@@ -11,6 +11,7 @@ namespace Puzzle8Solver
         {
             Previous = previous;
             Matrix = matrix;
+            PuzzleManager.GeneratedSteps++;
         }
 
 
