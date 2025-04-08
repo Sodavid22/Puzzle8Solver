@@ -27,7 +27,7 @@ namespace Puzzle8Solver
             }
             Debug.WriteLine("");
         }
-
+        
 
         public bool IsEqual(int[] matrix)
         {

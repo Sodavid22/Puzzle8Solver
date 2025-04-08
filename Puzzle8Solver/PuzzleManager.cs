@@ -1,5 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
+using SharpDX.Mathematics.Interop;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -10,13 +12,13 @@ namespace Puzzle8Solver
 
         const int ButtonSize = 100;
         static Button[] Buttons = new Button[9];
-        static List<PuzzleStep> AllSteps;
-        static List<PuzzleStep> LastSteps;
-        static List<PuzzleStep> NewSteps;
+        static List<PuzzleStep> PreviousGeneration;
+        static List<PuzzleStep> NewGeneration;
         public static List<PuzzleStep> FinalSteps;
+        public static Hashtable TestedStepsHashed;
         public static List<int> RemainingNumbers = new List<int>() {1, 2, 3, 4, 5, 6, 7, 8 };
         public static int CurrentStep = 0;
-        static int[] Input = new int[9];
+        static int[] StartingMatrix = new int[9];
         static int[] DisplayedMatrix = new int[9];
         public static bool Solved = false;
 
@@ -40,10 +42,10 @@ namespace Puzzle8Solver
                 Buttons[i].Text = DisplayedMatrix[i].ToString();
                 Buttons[i].Update(elapsedTime);
 
-                if (Buttons[i].IsPressed(MouseKey.Left) && RemainingNumbers.Count > 0 && Input[i] == 0)
+                if (Buttons[i].IsPressed(MouseKey.Left) && RemainingNumbers.Count > 0 && StartingMatrix[i] == 0)
                 {
-                    Input[i] = RemainingNumbers[0];
-                    RemainingNumbers.Remove(Input[i]);
+                    StartingMatrix[i] = RemainingNumbers[0];
+                    RemainingNumbers.Remove(StartingMatrix[i]);
                 }
             }
 
@@ -53,7 +55,7 @@ namespace Puzzle8Solver
             }
             else
             {
-                DisplayedMatrix = (int[])Input.Clone();
+                DisplayedMatrix = (int[])StartingMatrix.Clone();
             }
         }
 
@@ -74,8 +76,8 @@ namespace Puzzle8Solver
 
             for (int i = 0; i < 9; i++)
             {
-                Input[i] = RemainingNumbers[random.Next(0, RemainingNumbers.Count)];
-                RemainingNumbers.Remove(Input[i]);
+                StartingMatrix[i] = RemainingNumbers[random.Next(0, RemainingNumbers.Count)];
+                RemainingNumbers.Remove(StartingMatrix[i]);
             }
             Solved = false;
             Game.Buttons[0].Color = Color.FromNonPremultiplied(Game.Self.buttoncolor);
@@ -84,7 +86,7 @@ namespace Puzzle8Solver
 
         public static void ClearInput()
         {
-            Input = new int[9];
+            StartingMatrix = new int[9];
             RemainingNumbers = new List<int>() { 1, 2, 3, 4, 5, 6, 7, 8 };
             Solved = false;
             Game.Buttons[0].Color = Color.FromNonPremultiplied(Game.Self.buttoncolor);
@@ -93,18 +95,18 @@ namespace Puzzle8Solver
 
         public static void Solve()
         {
-            AllSteps = new List<PuzzleStep>();
-            LastSteps = new List<PuzzleStep>();
-            NewSteps = new List<PuzzleStep>();
+            PreviousGeneration = new List<PuzzleStep>();
+            NewGeneration = new List<PuzzleStep>();
             FinalSteps = new List<PuzzleStep>();
+            TestedStepsHashed = new Hashtable();
             PuzzleStep finalStep = null;
             Solved = false;
 
             int[] solution = new int[9] { 0,1,2,3,4,5,6,7,8 };
 
-            PuzzleStep firstStep = new PuzzleStep(null, Input);
-            AllSteps.Add(firstStep);
-            LastSteps.Add(firstStep);
+            PuzzleStep firstStep = new PuzzleStep(null, StartingMatrix);
+            TestedStepsHashed.Add(firstStep.ToString(), firstStep);
+            PreviousGeneration.Add(firstStep);
 
             int generations = 0;
             Stopwatch sw = Stopwatch.StartNew();
@@ -115,13 +117,13 @@ namespace Puzzle8Solver
                 finalStep = firstStep;
             }
 
-            while (!Solved && generations < 32)
+            while (!Solved && generations < 31)
             {
-                foreach (PuzzleStep step in LastSteps)
+                foreach (PuzzleStep step in PreviousGeneration)
                 {
                     CreateChilderen(step);
                 }
-                foreach (PuzzleStep step in NewSteps)
+                foreach (PuzzleStep step in NewGeneration)
                 {
                     if (step.IsEqual(solution))
                     {
@@ -131,12 +133,11 @@ namespace Puzzle8Solver
                     }
                 }
 
-                LastSteps = NewSteps;
-                NewSteps = new List<PuzzleStep>();
+                PreviousGeneration = NewGeneration;
+                NewGeneration = new List<PuzzleStep>();
                 generations++;
                 Debug.WriteLine("generation: " + generations);
-                Debug.WriteLine("childeren: " + LastSteps.Count);
-                Debug.WriteLine("total: " + AllSteps.Count);
+                Debug.WriteLine("childeren: " + PreviousGeneration.Count);
                 Debug.WriteLine("---------------");
             }
 
@@ -150,19 +151,16 @@ namespace Puzzle8Solver
                     FinalSteps.Add(currentStep);
                     currentStep = currentStep.Previous;
                 }
-                FinalSteps.Add(AllSteps[0]);
                 CurrentStep = 0;
 
                 Game.Buttons[0].Color = Color.LawnGreen;
                 Debug.WriteLine("SOLVED");
-                Debug.WriteLine("positions tried: " + AllSteps.Count);
                 Debug.WriteLine("time: " + sw.Elapsed);
             }
             else
             {
                 Game.Buttons[0].Color = Color.Orange;
                 Debug.WriteLine("FAILED");
-                Debug.WriteLine("positions tried: " + AllSteps.Count);
                 Debug.WriteLine("time: " + sw.Elapsed);
             }
         }
@@ -170,7 +168,6 @@ namespace Puzzle8Solver
         public static void CreateChilderen(PuzzleStep step)
         {
             int[] newMatrix;
-            PuzzleStep newStep;
 
             for (int i = 0; i < 9; i++)
             {
@@ -183,12 +180,7 @@ namespace Puzzle8Solver
                         newMatrix[i] = newMatrix[i+1];
                         newMatrix[i+1] = 0;
 
-                        if (!IsDuplicate(newMatrix)) 
-                        {
-                            newStep = new PuzzleStep(step, newMatrix);
-                            AllSteps.Add(newStep);
-                            NewSteps.Add(newStep);
-                        }
+                        SaveIfNew(step, newMatrix);
                     }
                     if (i != 0 && i != 3 && i != 6) // move zero left
                     {
@@ -197,12 +189,7 @@ namespace Puzzle8Solver
                         newMatrix[i] = newMatrix[i-1];
                         newMatrix[i-1] = 0;
 
-                        if (!IsDuplicate(newMatrix))
-                        {
-                            newStep = new PuzzleStep(step, newMatrix);
-                            AllSteps.Add(newStep);
-                            NewSteps.Add(newStep);
-                        }
+                        SaveIfNew(step, newMatrix);
                     }
                     if (i > 2) // move zero up
                     {
@@ -211,12 +198,7 @@ namespace Puzzle8Solver
                         newMatrix[i] = newMatrix[i-3];
                         newMatrix[i-3] = 0;
 
-                        if (!IsDuplicate(newMatrix))
-                        {
-                            newStep = new PuzzleStep(step, newMatrix);
-                            AllSteps.Add(newStep);
-                            NewSteps.Add(newStep);
-                        }
+                        SaveIfNew(step, newMatrix);
                     }
                     if (i < 6) // move zero down
                     {
@@ -225,28 +207,27 @@ namespace Puzzle8Solver
                         newMatrix[i] = newMatrix[i+3];
                         newMatrix[i+3] = 0;
 
-                        if (!IsDuplicate(newMatrix))
-                        {
-                            newStep = new PuzzleStep(step, newMatrix);
-                            AllSteps.Add(newStep);
-                            NewSteps.Add(newStep);
-                        }
+                        SaveIfNew(step, newMatrix);
                     }
                     return;
                 }
             }
         }
 
-        public static bool IsDuplicate(int[] matrix)
+        public static void SaveIfNew(PuzzleStep step, int[] matrix)
         {
-            foreach (PuzzleStep comparedStep in AllSteps)
+            if (!TestedStepsHashed.Contains(MatrixToString(matrix)))
             {
-                if (comparedStep.IsEqual(matrix))
-                {
-                    return true;
-                }
+                PuzzleStep newStep = new PuzzleStep(step, matrix);
+                NewGeneration.Add(newStep);
+                TestedStepsHashed.Add(MatrixToString(matrix), newStep);
             }
-            return false;
+        }
+
+
+        public static string MatrixToString(int[] Matrix)
+        {
+            return string.Join("", Matrix); ;
         }
     }
 }
