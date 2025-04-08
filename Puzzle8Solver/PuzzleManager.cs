@@ -14,10 +14,10 @@ namespace Puzzle8Solver
         static List<PuzzleStep> LastSteps;
         static List<PuzzleStep> NewSteps;
         public static List<PuzzleStep> FinalSteps;
-        public static List<byte> RemainingNumbers = new List<byte>() {1, 2, 3, 4, 5, 6, 7, 8 };
+        public static List<int> RemainingNumbers = new List<int>() {1, 2, 3, 4, 5, 6, 7, 8 };
         public static int CurrentStep = 0;
-        static byte[] Input = new byte[9];
-        static byte[] DisplayedMatrix = new byte[9];
+        static int[] Input = new int[9];
+        static int[] DisplayedMatrix = new int[9];
         public static bool Solved = false;
 
 
@@ -49,11 +49,11 @@ namespace Puzzle8Solver
 
             if (Solved)
             {
-                DisplayedMatrix = (byte[])FinalSteps[CurrentStep].Matrix.Clone();
+                DisplayedMatrix = (int[])FinalSteps[CurrentStep].Matrix.Clone();
             }
             else
             {
-                DisplayedMatrix = (byte[])Input.Clone();
+                DisplayedMatrix = (int[])Input.Clone();
             }
         }
 
@@ -69,7 +69,7 @@ namespace Puzzle8Solver
 
         public static void GenerateMatrix()
         {
-            RemainingNumbers = new List<byte> () {0,1,2,3,4,5,6,7,8};
+            RemainingNumbers = new List<int> () {0,1,2,3,4,5,6,7,8};
             Random random = new Random();
 
             for (int i = 0; i < 9; i++)
@@ -84,8 +84,8 @@ namespace Puzzle8Solver
 
         public static void ClearInput()
         {
-            Input = new byte[9];
-            RemainingNumbers = new List<byte>() { 1, 2, 3, 4, 5, 6, 7, 8 };
+            Input = new int[9];
+            RemainingNumbers = new List<int>() { 1, 2, 3, 4, 5, 6, 7, 8 };
             Solved = false;
             Game.Buttons[0].Color = Color.FromNonPremultiplied(Game.Self.buttoncolor);
         }
@@ -100,7 +100,7 @@ namespace Puzzle8Solver
             PuzzleStep finalStep = null;
             Solved = false;
 
-            byte[] solution = new byte[9] { 0,1,2,3,4,5,6,7,8 };
+            int[] solution = new int[9] { 0,1,2,3,4,5,6,7,8 };
 
             PuzzleStep firstStep = new PuzzleStep(null, Input);
             AllSteps.Add(firstStep);
@@ -169,7 +169,7 @@ namespace Puzzle8Solver
 
         public static void CreateChilderen(PuzzleStep step)
         {
-            byte[] newMatrix;
+            int[] newMatrix;
             PuzzleStep newStep;
 
             for (int i = 0; i < 9; i++)
@@ -178,7 +178,7 @@ namespace Puzzle8Solver
                 {
                     if (i!= 2 && i!= 5 && i!= 8) // move zero right
                     {
-                        newMatrix = (byte[])step.Matrix.Clone();
+                        newMatrix = (int[])step.Matrix.Clone();
 
                         newMatrix[i] = newMatrix[i+1];
                         newMatrix[i+1] = 0;
@@ -192,7 +192,7 @@ namespace Puzzle8Solver
                     }
                     if (i != 0 && i != 3 && i != 6) // move zero left
                     {
-                        newMatrix = (byte[])step.Matrix.Clone();
+                        newMatrix = (int[])step.Matrix.Clone();
 
                         newMatrix[i] = newMatrix[i-1];
                         newMatrix[i-1] = 0;
@@ -206,7 +206,7 @@ namespace Puzzle8Solver
                     }
                     if (i > 2) // move zero up
                     {
-                        newMatrix = (byte[])step.Matrix.Clone();
+                        newMatrix = (int[])step.Matrix.Clone();
 
                         newMatrix[i] = newMatrix[i-3];
                         newMatrix[i-3] = 0;
@@ -220,7 +220,7 @@ namespace Puzzle8Solver
                     }
                     if (i < 6) // move zero down
                     {
-                        newMatrix = (byte[])step.Matrix.Clone();
+                        newMatrix = (int[])step.Matrix.Clone();
 
                         newMatrix[i] = newMatrix[i+3];
                         newMatrix[i+3] = 0;
@@ -237,7 +237,7 @@ namespace Puzzle8Solver
             }
         }
 
-        public static bool IsDuplicate(byte[] matrix)
+        public static bool IsDuplicate(int[] matrix)
         {
             foreach (PuzzleStep comparedStep in AllSteps)
             {

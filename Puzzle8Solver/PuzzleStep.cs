@@ -5,9 +5,9 @@ namespace Puzzle8Solver
     internal class PuzzleStep
     {
         public PuzzleStep Previous;
-        public byte[] Matrix;
+        public int[] Matrix;
 
-        public PuzzleStep(PuzzleStep previous, byte[] matrix)
+        public PuzzleStep(PuzzleStep previous, int[] matrix)
         {
             Previous = previous;
             Matrix = matrix;
@@ -29,7 +29,7 @@ namespace Puzzle8Solver
         }
 
 
-        public bool IsEqual(byte[] matrix)
+        public bool IsEqual(int[] matrix)
         {
             for (int i = 0; i < 9; i++)
             {
